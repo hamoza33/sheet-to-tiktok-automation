@@ -21,6 +21,14 @@ export class HealthCheckServer implements IHealthCheckServer {
   }
 
   private setupRoutes(): void {
+    this.app.get('/', (_req: Request, res: Response) => {
+      res.json({
+        service: 'Sheet-to-TikTok Automation',
+        version: '1.0.0',
+        endpoints: { health: '/health' },
+      });
+    });
+
     this.app.get('/health', (_req: Request, res: Response) => {
       const response: HealthStatus = {
         status: this.currentStatus,
