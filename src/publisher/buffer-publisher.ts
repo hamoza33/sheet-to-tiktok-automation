@@ -12,8 +12,7 @@ const CREATE_POST_MUTATION = `
       input: {
         text: $text
         channelId: $channelId
-        schedulingType: direct
-        mode: share
+        mode: shareNow
         assets: [{ video: { url: $videoUrl } }]
       }
     ) {
