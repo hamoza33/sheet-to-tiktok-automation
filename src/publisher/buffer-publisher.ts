@@ -7,7 +7,7 @@ const MAX_RETRIES = 3;
 const RETRY_DELAY_MS = 5_000;
 
 const CREATE_POST_MUTATION = `
-  mutation CreatePost($text: String!, $channelId: String!, $videoUrl: String!) {
+  mutation CreatePost($text: String!, $channelId: ChannelId!, $videoUrl: String!) {
     createPost(
       input: {
         text: $text
