@@ -6,6 +6,7 @@ import type {
   ILogger,
 } from '../types.js';
 import type { HealthCheckServer } from '../health/health-check-server.js';
+import { addActivity, updateLastPollTime } from '../dashboard/activity-store.js';
 
 /**
  * Dependencies injected into the AutomationService for testability.
@@ -175,15 +176,24 @@ export class AutomationService {
 
         if (!validationResult.valid) {
           // Step b: Log validation errors and mark row as error
+          const errorDetail = validationResult.errors
+            .map(e => `${e.field}: ${e.message}`)
+            .join('; ');
+
           this.logger.warn('Row validation failed', {
             rowNumber: row.rowNumber,
             errors: validationResult.errors,
           });
 
+          addActivity({
+            rowNumber: row.rowNumber,
+            caption: row.captionText,
+            videoUrl: row.videoUrl,
+            status: 'error',
+            details: errorDetail,
+          });
+
           try {
-            const errorDetail = validationResult.errors
-              .map(e => `${e.field}: ${e.message}`)
-              .join('; ');
             await this.sheetPoller.markRowProcessed(row.rowNumber, 'error', errorDetail);
           } catch (markError) {
             this.logger.error('Failed to write error marker for invalid row', {
@@ -215,6 +225,14 @@ export class AutomationService {
 
         if (publishResult.success) {
           // Step f: Mark row as success
+          addActivity({
+            rowNumber: row.rowNumber,
+            caption: row.captionText,
+            videoUrl: row.videoUrl,
+            status: 'success',
+            details: `Post scheduled (ID: ${publishResult.postId || 'N/A'})`,
+          });
+
           try {
             await this.sheetPoller.markRowProcessed(row.rowNumber, 'success');
             this.logger.info('Successfully scheduled post', {
@@ -232,6 +250,14 @@ export class AutomationService {
           }
         } else {
           // Step g: Publish failed, mark row as failed
+          addActivity({
+            rowNumber: row.rowNumber,
+            caption: row.captionText,
+            videoUrl: row.videoUrl,
+            status: 'failed',
+            details: publishResult.error ?? 'Unknown publish error',
+          });
+
           try {
             await this.sheetPoller.markRowProcessed(
               row.rowNumber,
@@ -259,6 +285,7 @@ export class AutomationService {
       // Step 4: Update health check with last successful poll timestamp
       this.healthCheckServer.updateLastPoll(new Date());
       this.healthCheckServer.resetErrors();
+      updateLastPollTime();
 
     } catch (cycleError) {
       // Google Sheets API unreachable or other top-level error

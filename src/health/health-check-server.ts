@@ -1,9 +1,11 @@
 import express, { type Express, type Request, type Response } from 'express';
 import type { Server } from 'http';
 import type { HealthStatus, IHealthCheckServer } from '../types.js';
+import { createDashboardRouter } from '../dashboard/dashboard-routes.js';
 
 /**
  * HTTP health check server that exposes a GET /health endpoint.
+ * Also mounts the dashboard UI routes.
  * Tracks service health based on consecutive errors within a 60-second window.
  */
 export class HealthCheckServer implements IHealthCheckServer {
@@ -21,14 +23,11 @@ export class HealthCheckServer implements IHealthCheckServer {
   }
 
   private setupRoutes(): void {
-    this.app.get('/', (_req: Request, res: Response) => {
-      res.json({
-        service: 'Sheet-to-TikTok Automation',
-        version: '1.0.0',
-        endpoints: { health: '/health' },
-      });
-    });
+    // Body parsing for form submissions
+    this.app.use(express.urlencoded({ extended: false }));
+    this.app.use(express.json());
 
+    // Health endpoint (always accessible, no auth)
     this.app.get('/health', (_req: Request, res: Response) => {
       const response: HealthStatus = {
         status: this.currentStatus,
@@ -40,6 +39,9 @@ export class HealthCheckServer implements IHealthCheckServer {
       };
       res.json(response);
     });
+
+    // Mount dashboard router (handles /, /login, /activity, /settings, /api/*)
+    this.app.use(createDashboardRouter());
   }
 
   /**
