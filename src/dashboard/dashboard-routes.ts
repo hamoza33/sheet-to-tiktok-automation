@@ -18,10 +18,37 @@ import { loginPage } from './views/login.js';
 import { dashboardPage } from './views/dashboard.js';
 import { activityPage } from './views/activity.js';
 import { workflowsPage } from './views/workflows.js';
+import { accountsPage } from './views/accounts.js';
+import { projectsPage } from './views/projects.js';
+import { historyPage } from './views/history.js';
+import {
+  loadAccounts,
+  getAccounts,
+  getAccount,
+  addAccount,
+  updateAccount,
+  deleteAccount,
+} from '../accounts/account-manager.js';
+import {
+  loadProjects,
+  getProjects,
+  getProject,
+  createProject,
+  updateProject,
+  deleteProject,
+  runProject,
+} from '../projects/project-manager.js';
+import {
+  loadHistory,
+  getHistory,
+} from '../history/history-store.js';
 import type { WorkflowManager } from '../workflows/workflow-manager.js';
 
-// Initialize the activity store from disk
+// Initialize stores from disk
 loadActivities();
+loadAccounts();
+loadProjects();
+loadHistory();
 
 /**
  * Creates the dashboard Express Router with all routes.
@@ -29,6 +56,9 @@ loadActivities();
  */
 export function createDashboardRouter(workflowManager: WorkflowManager): Router {
   const router = Router();
+
+  // Helper to extract route param (Express 5 types return string | string[])
+  const paramId = (req: Request): string => String(req.params.id);
 
   // ─── Public Routes ────────────────────────────────────────────────────────────
 
@@ -83,7 +113,7 @@ export function createDashboardRouter(workflowManager: WorkflowManager): Router 
     res.send(activityPage({ ...data, statusFilter: status, workflowFilter: workflow, workflows }));
   });
 
-  // Workflows management page (replaces settings)
+  // Workflows management page
   router.get('/workflows', requireAuth, (req: Request, res: Response) => {
     const workflows = workflowManager.getWorkflows();
     const msg = req.query.saved === '1'
@@ -100,14 +130,175 @@ export function createDashboardRouter(workflowManager: WorkflowManager): Router 
     res.redirect('/workflows');
   });
 
+  // ─── Accounts Page ────────────────────────────────────────────────────────────
+
+  router.get('/accounts', requireAuth, (req: Request, res: Response) => {
+    const accounts = getAccounts();
+    const msg = req.query.saved === '1'
+      ? { type: 'success' as const, text: 'Account saved!' }
+      : req.query.error
+        ? { type: 'error' as const, text: String(req.query.error) }
+        : undefined;
+    res.setHeader('Content-Type', 'text/html');
+    res.send(accountsPage(accounts, msg));
+  });
+
+  // ─── Projects Page ────────────────────────────────────────────────────────────
+
+  router.get('/projects', requireAuth, (req: Request, res: Response) => {
+    const projects = getProjects();
+    const accounts = getAccounts();
+    const msg = req.query.saved === '1'
+      ? { type: 'success' as const, text: 'Project saved!' }
+      : req.query.error
+        ? { type: 'error' as const, text: String(req.query.error) }
+        : undefined;
+    res.setHeader('Content-Type', 'text/html');
+    res.send(projectsPage(projects, accounts, msg));
+  });
+
+  // ─── History Page ─────────────────────────────────────────────────────────────
+
+  router.get('/history', requireAuth, (req: Request, res: Response) => {
+    const page = Math.max(1, parseInt(req.query.page as string) || 1);
+    const status = (req.query.status as string) || 'all';
+    const project = (req.query.project as string) || 'all';
+    const data = getHistory(page, 25, status, project);
+    const projects = getProjects();
+    res.setHeader('Content-Type', 'text/html');
+    res.send(historyPage({ ...data, statusFilter: status, projectFilter: project, projects }));
+  });
+
+  // ─── Account API Endpoints ────────────────────────────────────────────────────
+
+  router.get('/api/accounts', requireAuth, (_req: Request, res: Response) => {
+    res.json(getAccounts());
+  });
+
+  router.post('/api/accounts', requireAuth, (req: Request, res: Response) => {
+    const body = req.body as Record<string, string> | undefined;
+    if (!body || !body.nickname || !body.openaiApiKey) {
+      res.status(400).json({ success: false, message: 'Nickname and OpenAI API key are required' });
+      return;
+    }
+    const account = addAccount(body.nickname, body.proxy || '', body.openaiApiKey);
+    res.status(201).json(account);
+  });
+
+  router.get('/api/accounts/:id', requireAuth, (req: Request, res: Response) => {
+    const account = getAccount(paramId(req));
+    if (!account) {
+      res.status(404).json({ success: false, message: 'Account not found' });
+      return;
+    }
+    res.json(account);
+  });
+
+  router.put('/api/accounts/:id', requireAuth, (req: Request, res: Response) => {
+    const body = req.body as Record<string, string> | undefined;
+    if (!body) {
+      res.status(400).json({ success: false, message: 'No body provided' });
+      return;
+    }
+    const updated = updateAccount(paramId(req), {
+      nickname: body.nickname,
+      proxy: body.proxy,
+      openaiApiKey: body.openaiApiKey,
+    });
+    if (!updated) {
+      res.status(404).json({ success: false, message: 'Account not found' });
+      return;
+    }
+    res.json(updated);
+  });
+
+  router.delete('/api/accounts/:id', requireAuth, (req: Request, res: Response) => {
+    const deleted = deleteAccount(paramId(req));
+    if (!deleted) {
+      res.status(404).json({ success: false, message: 'Account not found' });
+      return;
+    }
+    res.json({ success: true, message: 'Account deleted' });
+  });
+
+  // ─── Project API Endpoints ────────────────────────────────────────────────────
+
+  router.get('/api/projects', requireAuth, (_req: Request, res: Response) => {
+    res.json(getProjects());
+  });
+
+  router.post('/api/projects', requireAuth, (req: Request, res: Response) => {
+    const body = req.body as Record<string, string> | undefined;
+    if (!body || !body.name || !body.videoUrl || !body.commentTemplate || !body.accountId) {
+      res.status(400).json({ success: false, message: 'All fields are required (name, videoUrl, commentTemplate, accountId)' });
+      return;
+    }
+    const project = createProject(body.name, body.videoUrl, body.commentTemplate, body.accountId);
+    res.status(201).json(project);
+  });
+
+  router.get('/api/projects/:id', requireAuth, (req: Request, res: Response) => {
+    const project = getProject(paramId(req));
+    if (!project) {
+      res.status(404).json({ success: false, message: 'Project not found' });
+      return;
+    }
+    res.json(project);
+  });
+
+  router.put('/api/projects/:id', requireAuth, (req: Request, res: Response) => {
+    const body = req.body as Record<string, string> | undefined;
+    if (!body) {
+      res.status(400).json({ success: false, message: 'No body provided' });
+      return;
+    }
+    const updated = updateProject(paramId(req), {
+      name: body.name,
+      videoUrl: body.videoUrl,
+      commentTemplate: body.commentTemplate,
+      accountId: body.accountId,
+    });
+    if (!updated) {
+      res.status(404).json({ success: false, message: 'Project not found' });
+      return;
+    }
+    res.json(updated);
+  });
+
+  router.delete('/api/projects/:id', requireAuth, (req: Request, res: Response) => {
+    const deleted = deleteProject(paramId(req));
+    if (!deleted) {
+      res.status(404).json({ success: false, message: 'Project not found' });
+      return;
+    }
+    res.json({ success: true, message: 'Project deleted' });
+  });
+
+  router.post('/api/projects/:id/run', requireAuth, async (req: Request, res: Response) => {
+    const result = await runProject(paramId(req));
+    if (result.success) {
+      res.json({ success: true, message: result.message });
+    } else {
+      res.status(400).json({ success: false, message: result.message });
+    }
+  });
+
+  // ─── History API Endpoints ────────────────────────────────────────────────────
+
+  router.get('/api/history', requireAuth, (req: Request, res: Response) => {
+    const page = Math.max(1, parseInt(req.query.page as string) || 1);
+    const status = (req.query.status as string) || 'all';
+    const project = (req.query.project as string) || 'all';
+    const data = getHistory(page, 25, status, project);
+    res.json(data);
+  });
+
   // ─── Workflow API Endpoints ───────────────────────────────────────────────────
 
-  // GET /api/workflows — list all workflows
   router.get('/api/workflows', requireAuth, (_req: Request, res: Response) => {
     res.json(workflowManager.getWorkflows());
   });
 
-  // POST /api/workflows — create new workflow
   router.post('/api/workflows', requireAuth, async (req: Request, res: Response) => {
     const body = req.body as Record<string, unknown> | undefined;
     if (!body || !body.name || !body.sheetId) {
@@ -135,9 +326,8 @@ export function createDashboardRouter(workflowManager: WorkflowManager): Router 
     }
   });
 
-  // GET /api/workflows/:id — get single workflow
   router.get('/api/workflows/:id', requireAuth, (req: Request, res: Response) => {
-    const workflow = workflowManager.getWorkflow(req.params.id);
+    const workflow = workflowManager.getWorkflow(paramId(req));
     if (!workflow) {
       res.status(404).json({ success: false, message: 'Workflow not found' });
       return;
@@ -145,7 +335,6 @@ export function createDashboardRouter(workflowManager: WorkflowManager): Router 
     res.json(workflow);
   });
 
-  // PUT /api/workflows/:id — update workflow
   router.put('/api/workflows/:id', requireAuth, async (req: Request, res: Response) => {
     const body = req.body as Record<string, unknown> | undefined;
     if (!body) {
@@ -154,7 +343,7 @@ export function createDashboardRouter(workflowManager: WorkflowManager): Router 
     }
 
     try {
-      const updated = await workflowManager.updateWorkflow(req.params.id, {
+      const updated = await workflowManager.updateWorkflow(paramId(req), {
         name: body.name !== undefined ? String(body.name) : undefined,
         sheetId: body.sheetId !== undefined ? String(body.sheetId) : undefined,
         worksheetName: body.worksheetName !== undefined ? String(body.worksheetName) : undefined,
@@ -178,9 +367,8 @@ export function createDashboardRouter(workflowManager: WorkflowManager): Router 
     }
   });
 
-  // DELETE /api/workflows/:id — delete workflow
   router.delete('/api/workflows/:id', requireAuth, async (req: Request, res: Response) => {
-    const deleted = await workflowManager.deleteWorkflow(req.params.id);
+    const deleted = await workflowManager.deleteWorkflow(paramId(req));
     if (!deleted) {
       res.status(404).json({ success: false, message: 'Workflow not found' });
       return;
@@ -188,11 +376,10 @@ export function createDashboardRouter(workflowManager: WorkflowManager): Router 
     res.json({ success: true, message: 'Workflow deleted' });
   });
 
-  // POST /api/workflows/:id/start — start workflow
   router.post('/api/workflows/:id/start', requireAuth, async (req: Request, res: Response) => {
-    const started = await workflowManager.startWorkflow(req.params.id);
+    const started = await workflowManager.startWorkflow(paramId(req));
     if (!started) {
-      const wf = workflowManager.getWorkflow(req.params.id);
+      const wf = workflowManager.getWorkflow(paramId(req));
       if (!wf) {
         res.status(404).json({ success: false, message: 'Workflow not found' });
       } else {
@@ -203,9 +390,8 @@ export function createDashboardRouter(workflowManager: WorkflowManager): Router 
     res.json({ success: true, message: 'Workflow started' });
   });
 
-  // POST /api/workflows/:id/stop — stop workflow
   router.post('/api/workflows/:id/stop', requireAuth, (req: Request, res: Response) => {
-    const stopped = workflowManager.stopWorkflow(req.params.id);
+    const stopped = workflowManager.stopWorkflow(paramId(req));
     if (!stopped) {
       res.status(404).json({ success: false, message: 'Workflow not found' });
       return;
@@ -213,9 +399,8 @@ export function createDashboardRouter(workflowManager: WorkflowManager): Router 
     res.json({ success: true, message: 'Workflow stopped' });
   });
 
-  // POST /api/workflows/:id/poll — trigger immediate poll
   router.post('/api/workflows/:id/poll', requireAuth, async (req: Request, res: Response) => {
-    const polled = await workflowManager.pollNow(req.params.id);
+    const polled = await workflowManager.pollNow(paramId(req));
     if (!polled) {
       res.status(404).json({ success: false, message: 'Workflow not found or failed to poll' });
       return;
@@ -225,7 +410,6 @@ export function createDashboardRouter(workflowManager: WorkflowManager): Router 
 
   // ─── Legacy API Endpoints (backward compat) ──────────────────────────────────
 
-  // GET /api/status
   router.get('/api/status', requireAuth, (_req: Request, res: Response) => {
     const stats = getStats();
     const workflows = workflowManager.getWorkflows();
@@ -246,7 +430,6 @@ export function createDashboardRouter(workflowManager: WorkflowManager): Router 
     });
   });
 
-  // GET /api/activity
   router.get('/api/activity', requireAuth, (req: Request, res: Response) => {
     const page = Math.max(1, parseInt(req.query.page as string) || 1);
     const status = (req.query.status as string) || 'all';
