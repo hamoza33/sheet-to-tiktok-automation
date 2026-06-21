@@ -19,5 +19,5 @@ jobs:
             git pull origin main
             npm install
             npm run build
-            pm2 restart sheet-to-tiktok-automation || pm2 start dist/index.js --name "sheet-to-tiktok-automation"
+            pm2 restart tiktok-comments || pm2 start dist/index.js --name "tiktok-comments"
             pm2 save
