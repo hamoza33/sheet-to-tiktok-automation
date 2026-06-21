@@ -1,0 +1,23 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          password: ${{ secrets.VPS_PASSWORD }}
+          script: |
+            cd ~/Tiktok-comments-manager
+            git pull origin main
+            npm install
+            npm run build
+            pm2 restart sheet-to-tiktok-automation || pm2 start dist/index.js --name "sheet-to-tiktok-automation"
+            pm2 save
