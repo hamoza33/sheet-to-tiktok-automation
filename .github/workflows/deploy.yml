@@ -15,9 +15,9 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           password: ${{ secrets.VPS_PASSWORD }}
           script: |
-            cd ~/Tiktok-comments-manager
+            cd ~/sheet-to-tiktok-automation
             git pull origin main
             npm install
             npm run build
-            pm2 restart tiktok-comments || pm2 start dist/index.js --name "tiktok-comments"
+            pm2 restart ecosystem.config.cjs
             pm2 save
