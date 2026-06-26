@@ -52,7 +52,12 @@ export function workflowsPage(
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                 <div class="form-group">
                   <label for="wf-bufferAccessToken">Buffer Access Token</label>
-                  <input type="password" id="wf-bufferAccessToken" required placeholder="Buffer API token">
+                  <div style="position: relative;">
+                    <input type="password" id="wf-bufferAccessToken" required placeholder="Buffer API token" style="padding-right: 2.5rem;">
+                    <button type="button" onclick="toggleTokenVisibility()" id="toggle-token-btn" style="position: absolute; right: 0.5rem; top: 50%; transform: translateY(-50%); background: none; border: none; color: #a0a0b0; cursor: pointer; font-size: 1.1rem; padding: 0.25rem;" title="Toggle visibility">
+                      <span id="eye-icon">👁</span>
+                    </button>
+                  </div>
                 </div>
                 <div class="form-group">
                   <label for="wf-bufferChannelId">Buffer Channel ID</label>
@@ -87,6 +92,18 @@ export function workflowsPage(
 
       <script>
         const DEFAULT_CREDENTIALS_PREFILL = ${JSON.stringify(DEFAULT_GOOGLE_CREDENTIALS_JSON)};
+
+        function toggleTokenVisibility() {
+          const input = document.getElementById('wf-bufferAccessToken');
+          const icon = document.getElementById('eye-icon');
+          if (input.type === 'password') {
+            input.type = 'text';
+            icon.textContent = '🙈';
+          } else {
+            input.type = 'password';
+            icon.textContent = '👁';
+          }
+        }
 
         function showNewForm() {
           document.getElementById('form-workflow-id').value = '';

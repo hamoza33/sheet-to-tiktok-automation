@@ -4,7 +4,7 @@
 
 export interface LayoutOptions {
   title: string;
-  activePage?: 'dashboard' | 'activity' | 'settings' | 'workflows' | 'accounts' | 'projects' | 'history' | 'login';
+  activePage?: 'dashboard' | 'activity' | 'settings' | 'workflows' | 'login';
   showNav?: boolean;
   content: string;
 }
@@ -25,9 +25,6 @@ export function layout(options: LayoutOptions): string {
         </div>
         <div class="nav-links">
           ${navItem('/', 'Dashboard', 'dashboard')}
-          ${navItem('/accounts', 'Accounts', 'accounts')}
-          ${navItem('/projects', 'Projects', 'projects')}
-          ${navItem('/history', 'History', 'history')}
           ${navItem('/activity', 'Activity', 'activity')}
           ${navItem('/workflows', 'Workflows', 'workflows')}
           ${navItem('/settings', 'Settings', 'settings')}
