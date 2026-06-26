@@ -1,5 +1,6 @@
 import { layout } from './layout.js';
 import type { WorkflowState } from '../../workflows/workflow-manager.js';
+import { DEFAULT_GOOGLE_CREDENTIALS_JSON } from '../../workflows/workflow-manager.js';
 
 export function workflowsPage(
   workflows: WorkflowState[],
@@ -85,12 +86,17 @@ export function workflowsPage(
       </div>
 
       <script>
+        const DEFAULT_CREDENTIALS_PREFILL = ${JSON.stringify(DEFAULT_GOOGLE_CREDENTIALS_JSON)};
+
         function showNewForm() {
           document.getElementById('form-workflow-id').value = '';
           document.getElementById('form-title').textContent = 'New Workflow';
           document.getElementById('workflow-form').reset();
           document.getElementById('wf-pollingInterval').value = '60';
           document.getElementById('wf-worksheetName').value = 'TikTok';
+          document.getElementById('wf-credentials').value = DEFAULT_CREDENTIALS_PREFILL;
+          document.getElementById('wf-credentials').required = true;
+          document.getElementById('wf-credentials').placeholder = 'Paste full service account JSON here';
           document.getElementById('workflow-form-container').style.display = 'block';
           document.getElementById('wf-name').focus();
         }
@@ -170,6 +176,21 @@ export function workflowsPage(
           }
         }
 
+        async function duplicateWorkflow(id) {
+          try {
+            const res = await fetch('/api/workflows/' + id + '/duplicate', { method: 'POST' });
+            if (res.ok) {
+              showToast('success', 'Workflow duplicated!');
+              setTimeout(() => location.reload(), 1000);
+            } else {
+              const data = await res.json();
+              showToast('error', data.message || 'Failed to duplicate workflow');
+            }
+          } catch {
+            showToast('error', 'Network error');
+          }
+        }
+
         async function controlWorkflow(id, action) {
           try {
             const res = await fetch('/api/workflows/' + id + '/' + action, { method: 'POST' });
@@ -228,6 +249,7 @@ function workflowCard(wf: WorkflowState): string {
         ${wf.status === 'running' ? `<button onclick="controlWorkflow('${wf.id}', 'stop')" class="btn btn-danger" style="padding: 0.3rem 0.7rem; font-size: 0.8rem;">⏹ Stop</button>` : ''}
         <button onclick="controlWorkflow('${wf.id}', 'poll')" class="btn btn-secondary" style="padding: 0.3rem 0.7rem; font-size: 0.8rem;">🔄 Poll</button>
         <button onclick="editWorkflow('${wf.id}')" class="btn btn-secondary" style="padding: 0.3rem 0.7rem; font-size: 0.8rem;">✏️ Edit</button>
+        <button onclick="duplicateWorkflow('${wf.id}')" class="btn btn-secondary" style="padding: 0.3rem 0.7rem; font-size: 0.8rem;">📋 Duplicate</button>
         <button onclick="deleteWorkflow('${wf.id}', '${escapeHtml(wf.name)}')" class="btn btn-danger" style="padding: 0.3rem 0.7rem; font-size: 0.8rem;">🗑️</button>
       </div>
     </div>

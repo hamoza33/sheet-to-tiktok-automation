@@ -408,6 +408,22 @@ export function createDashboardRouter(workflowManager: WorkflowManager): Router 
     res.json({ success: true, message: 'Poll triggered' });
   });
 
+  router.post('/api/workflows/:id/duplicate', requireAuth, async (req: Request, res: Response) => {
+    try {
+      const duplicated = await workflowManager.duplicateWorkflow(paramId(req));
+      if (!duplicated) {
+        res.status(404).json({ success: false, message: 'Workflow not found' });
+        return;
+      }
+      res.status(201).json(duplicated);
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: error instanceof Error ? error.message : 'Failed to duplicate workflow',
+      });
+    }
+  });
+
   // ─── Legacy API Endpoints (backward compat) ──────────────────────────────────
 
   router.get('/api/status', requireAuth, (_req: Request, res: Response) => {

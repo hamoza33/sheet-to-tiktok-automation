@@ -157,4 +157,32 @@ export class SheetPoller implements ISheetPoller {
     saveProcessedRows(processedRowNumbers);
   }
 
+  /**
+   * Fetches all row numbers from the configured worksheet that have a video URL,
+   * regardless of processing status. Used to pre-mark existing rows when adding a new workflow.
+   */
+  async fetchAllRowNumbers(): Promise<number[]> {
+    if (!this.doc) {
+      await this.authenticate();
+    }
+
+    const sheet = this.doc!.sheetsByTitle[this.config.worksheetName];
+    if (!sheet) {
+      throw new Error(`Worksheet "${this.config.worksheetName}" not found in spreadsheet.`);
+    }
+
+    const rows = await sheet.getRows();
+    const rowNumbers: number[] = [];
+
+    for (const row of rows) {
+      const rawData = (row as any)._rawData || [];
+      const videoUrl = row.get('Videos') ?? row.get('Video') ?? row.get('Video URL') ?? row.get('video') ?? rawData[0] ?? '';
+
+      if (videoUrl && videoUrl.trim() !== '') {
+        rowNumbers.push(row.rowNumber);
+      }
+    }
+
+    return rowNumbers;
+  }
 }
