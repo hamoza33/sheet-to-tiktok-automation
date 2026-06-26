@@ -130,6 +130,8 @@ export function workflowsPage(
           fetch('/api/workflows/' + id)
             .then(r => r.json())
             .then(wf => {
+              document.getElementById('wf-bufferAccessToken').type = 'password';
+              document.getElementById('eye-icon').textContent = '👁';
               document.getElementById('form-workflow-id').value = wf.id;
               document.getElementById('form-title').textContent = 'Edit Workflow';
               document.getElementById('wf-name').value = wf.name;
