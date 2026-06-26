@@ -57,32 +57,56 @@ export class BufferPublisher implements IBufferPublisher {
 
   /**
    * Test the connection to Buffer API using the provided access token.
-   * Queries account info and available channels.
+   * First queries account id/email to verify the token, then separately
+   * queries channels. If channels returns FORBIDDEN, still reports success
+   * with an empty channels array.
    */
   static async testConnection(accessToken: string): Promise<{ success: boolean; data?: { id: string; email: string; channels: Array<{ id: string; name: string; service: string }> }; error?: string }> {
-    const query = `query { account { id email channels { id name service } } }`;
+    const accountQuery = `query { account { id email } }`;
+    const channelsQuery = `query { account { channels { id name service } } }`;
 
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+    const client = new GraphQLClient(BUFFER_API_URL, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
 
+    // First, verify the token works by querying account info
+    const accountController = new AbortController();
+    const accountTimeoutId = setTimeout(() => accountController.abort(), REQUEST_TIMEOUT_MS);
+
+    let accountData: { id: string; email: string };
     try {
-      const client = new GraphQLClient(BUFFER_API_URL, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
+      const result = await client.request<{ account: { id: string; email: string } }>({
+        document: accountQuery,
+        signal: accountController.signal,
       });
-
-      const result = await client.request<{ account: { id: string; email: string; channels: Array<{ id: string; name: string; service: string }> } }>({
-        document: query,
-        signal: controller.signal,
-      });
-      return { success: true, data: result.account };
+      accountData = result.account;
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       return { success: false, error: message };
     } finally {
-      clearTimeout(timeoutId);
+      clearTimeout(accountTimeoutId);
     }
+
+    // Then, try to fetch channels separately
+    const channelsController = new AbortController();
+    const channelsTimeoutId = setTimeout(() => channelsController.abort(), REQUEST_TIMEOUT_MS);
+
+    let channels: Array<{ id: string; name: string; service: string }> = [];
+    try {
+      const result = await client.request<{ account: { channels: Array<{ id: string; name: string; service: string }> } }>({
+        document: channelsQuery,
+        signal: channelsController.signal,
+      });
+      channels = result.account.channels;
+    } catch {
+      // Channels query failed (e.g. FORBIDDEN) - continue with empty channels
+    } finally {
+      clearTimeout(channelsTimeoutId);
+    }
+
+    return { success: true, data: { ...accountData, channels } };
   }
 
   async schedulePost(captionText: string, videoUrl: string): Promise<PublishResult> {
