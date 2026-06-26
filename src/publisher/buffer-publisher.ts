@@ -55,6 +55,28 @@ export class BufferPublisher implements IBufferPublisher {
     });
   }
 
+  /**
+   * Test the connection to Buffer API using the provided access token.
+   * Queries account info and available channels.
+   */
+  static async testConnection(accessToken: string): Promise<{ success: boolean; data?: { id: string; email: string; channels: Array<{ id: string; name: string; service: string }> }; error?: string }> {
+    const query = `query { account { id email channels { id name service } } }`;
+
+    try {
+      const client = new GraphQLClient(BUFFER_API_URL, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      const result = await client.request<{ account: { id: string; email: string; channels: Array<{ id: string; name: string; service: string }> } }>(query);
+      return { success: true, data: result.account };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      return { success: false, error: message };
+    }
+  }
+
   async schedulePost(captionText: string, videoUrl: string): Promise<PublishResult> {
     let lastError: string | undefined;
 

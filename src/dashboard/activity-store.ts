@@ -14,6 +14,8 @@ export interface ActivityEntry {
   details: string;
   workflowId: string;
   workflowName: string;
+  tiktokVideoLink?: string;
+  bufferUsername?: string;
 }
 
 /**

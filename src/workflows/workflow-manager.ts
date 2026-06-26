@@ -434,6 +434,8 @@ export class WorkflowManager {
             details: `Post scheduled (ID: ${publishResult.postId || 'N/A'})`,
             workflowId: rw.id,
             workflowName: rw.config.name,
+            tiktokVideoLink: row.videoUrl,
+            bufferUsername: rw.config.bufferChannelId,
           });
 
           try {

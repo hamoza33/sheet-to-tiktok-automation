@@ -18,6 +18,7 @@ import { loginPage } from './views/login.js';
 import { dashboardPage } from './views/dashboard.js';
 import { activityPage } from './views/activity.js';
 import { workflowsPage } from './views/workflows.js';
+import { settingsPage } from './views/settings.js';
 import { accountsPage } from './views/accounts.js';
 import { projectsPage } from './views/projects.js';
 import { historyPage } from './views/history.js';
@@ -43,6 +44,7 @@ import {
   getHistory,
 } from '../history/history-store.js';
 import type { WorkflowManager } from '../workflows/workflow-manager.js';
+import { BufferPublisher } from '../publisher/buffer-publisher.js';
 
 // Initialize stores from disk
 loadActivities();
@@ -125,9 +127,10 @@ export function createDashboardRouter(workflowManager: WorkflowManager): Router 
     res.send(workflowsPage(workflows, msg));
   });
 
-  // Redirect old settings route to workflows
+  // Settings page - Buffer API Tester
   router.get('/settings', requireAuth, (_req: Request, res: Response) => {
-    res.redirect('/workflows');
+    res.setHeader('Content-Type', 'text/html');
+    res.send(settingsPage());
   });
 
   // ─── Accounts Page ────────────────────────────────────────────────────────────
@@ -422,6 +425,21 @@ export function createDashboardRouter(workflowManager: WorkflowManager): Router 
         message: error instanceof Error ? error.message : 'Failed to duplicate workflow',
       });
     }
+  });
+
+  // ─── Buffer API Test Endpoint ─────────────────────────────────────────────────
+
+  router.post('/api/buffer-test', requireAuth, async (req: Request, res: Response) => {
+    const body = req.body as Record<string, string> | undefined;
+    const accessToken = body?.accessToken;
+
+    if (!accessToken) {
+      res.status(400).json({ success: false, error: 'Access token is required' });
+      return;
+    }
+
+    const result = await BufferPublisher.testConnection(accessToken);
+    res.json(result);
   });
 
   // ─── Legacy API Endpoints (backward compat) ──────────────────────────────────
