@@ -62,6 +62,9 @@ export class BufferPublisher implements IBufferPublisher {
   static async testConnection(accessToken: string): Promise<{ success: boolean; data?: { id: string; email: string; channels: Array<{ id: string; name: string; service: string }> }; error?: string }> {
     const query = `query { account { id email channels { id name service } } }`;
 
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
     try {
       const client = new GraphQLClient(BUFFER_API_URL, {
         headers: {
@@ -69,11 +72,16 @@ export class BufferPublisher implements IBufferPublisher {
         },
       });
 
-      const result = await client.request<{ account: { id: string; email: string; channels: Array<{ id: string; name: string; service: string }> } }>(query);
+      const result = await client.request<{ account: { id: string; email: string; channels: Array<{ id: string; name: string; service: string }> } }>({
+        document: query,
+        signal: controller.signal,
+      });
       return { success: true, data: result.account };
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       return { success: false, error: message };
+    } finally {
+      clearTimeout(timeoutId);
     }
   }
 

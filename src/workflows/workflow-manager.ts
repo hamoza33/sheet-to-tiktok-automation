@@ -267,12 +267,25 @@ export class WorkflowManager {
     const rw = this.workflows.get(id);
     if (!rw) return null;
 
-    // Read credentials file content
-    let credentialsJson = '';
+    // Read credentials file content - fail if unreadable
+    let credentialsJson: string;
     try {
       credentialsJson = readFileSync(rw.config.googleCredentialsPath, 'utf-8');
-    } catch {
-      // If credentials file is not readable, use empty string
+    } catch (error) {
+      this.logger.error(`Failed to read credentials for workflow duplication`, {
+        workflowId: id,
+        credentialsPath: rw.config.googleCredentialsPath,
+        error: error instanceof Error ? error.message : String(error),
+      });
+      return null;
+    }
+
+    if (!credentialsJson.trim()) {
+      this.logger.error(`Credentials file is empty, cannot duplicate workflow`, {
+        workflowId: id,
+        credentialsPath: rw.config.googleCredentialsPath,
+      });
+      return null;
     }
 
     const duplicateConfig: WorkflowConfig = {
