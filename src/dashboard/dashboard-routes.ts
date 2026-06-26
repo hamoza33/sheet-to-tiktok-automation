@@ -22,7 +22,7 @@ import { settingsPage } from './views/settings.js';
 import type { WorkflowManager } from '../workflows/workflow-manager.js';
 import { BufferPublisher } from '../publisher/buffer-publisher.js';
 
-// Initialize stores from disk
+// Load activity history from disk
 loadActivities();
 
 /**

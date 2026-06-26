@@ -114,11 +114,15 @@ export function workflowsPage(
           document.getElementById('wf-credentials').value = DEFAULT_CREDENTIALS_PREFILL;
           document.getElementById('wf-credentials').required = true;
           document.getElementById('wf-credentials').placeholder = 'Paste full service account JSON here';
+          document.getElementById('wf-bufferAccessToken').type = 'password';
+          document.getElementById('eye-icon').textContent = '👁';
           document.getElementById('workflow-form-container').style.display = 'block';
           document.getElementById('wf-name').focus();
         }
 
         function hideForm() {
+          document.getElementById('wf-bufferAccessToken').type = 'password';
+          document.getElementById('eye-icon').textContent = '👁';
           document.getElementById('workflow-form-container').style.display = 'none';
         }
 

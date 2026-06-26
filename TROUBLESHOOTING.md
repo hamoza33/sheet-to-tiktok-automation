@@ -12,12 +12,14 @@ EROFS: read-only file system, open '/app/credentials/service-account.json'
 
 **Cause:** The Docker credentials volume is mounted as read-only (`:ro`), preventing the application from writing to the credentials directory.
 
-**Fix:** Mount the volume as read-write by removing the `:ro` flag in `docker-compose.yml`, or ensure the application only needs to read the file (no writes to that path). Example:
+**Fix (Docker):** Mount the volume as read-write by removing the `:ro` flag in `docker-compose.yml`, or ensure the application only needs to read the file (no writes to that path). Example:
 
 ```yaml
 volumes:
   - ./credentials:/app/credentials  # remove :ro if writes are needed
 ```
+
+**Note:** This error does not apply to VPS/PM2 deployments since there is no container filesystem layer. If you see a similar permission error on a VPS, check file ownership and permissions with `ls -la credentials/` and fix with `chmod`/`chown`.
 
 ---
 
@@ -41,11 +43,20 @@ ENOENT: no such file or directory, open '/app/credentials/service-account.json'
 
 **Cause:** The credentials file path configured in the application does not match the actual file location. This typically happens when host paths and container paths are mismatched in the Docker volume mounts.
 
-**Fix:** Verify the volume mount paths in `docker-compose.yml` match what the application expects. The host path (left side of `:`) must point to where the credentials file actually exists, and the container path (right side) must match the path the application is configured to use.
+**Fix (Docker):** Verify the volume mount paths in `docker-compose.yml` match what the application expects. The host path (left side of `:`) must point to where the credentials file actually exists, and the container path (right side) must match the path the application is configured to use.
 
 ```yaml
 volumes:
   - ./credentials:/app/credentials  # host path : container path
+```
+
+**Fix (VPS/PM2):** Ensure the credentials file exists at the path specified in your `.env` or config. The path is relative to where PM2 starts the process (usually the project root):
+
+```bash
+# Verify the file exists
+ls -la credentials/service-account.json
+# Check what path the app expects
+grep -i credential .env
 ```
 
 ---
@@ -58,7 +69,7 @@ getaddrinfo EAI_AGAIN sheets.googleapis.com
 
 **Cause:** DNS resolution is failing inside the Docker container. The container cannot resolve external hostnames, which prevents connecting to Google Sheets API, Buffer API, or any external service.
 
-**Fix:** Add explicit DNS servers to the service in `docker-compose.yml`:
+**Fix (Docker):** Add explicit DNS servers to the service in `docker-compose.yml`:
 
 ```yaml
 services:
@@ -67,6 +78,17 @@ services:
       - 8.8.8.8
       - 8.8.4.4
 ```
+
+**Fix (VPS/PM2):** On a bare VPS, DNS failures point to host-level resolver issues. Check `/etc/resolv.conf` and ensure it has valid nameservers:
+
+```bash
+cat /etc/resolv.conf
+# Should contain lines like:
+# nameserver 8.8.8.8
+# nameserver 8.8.4.4
+```
+
+If using `systemd-resolved`, restart it with `sudo systemctl restart systemd-resolved`. You can also add DNS entries directly to `/etc/resolv.conf` or configure them via your VPS provider's network settings.
 
 ---
 
@@ -86,6 +108,20 @@ lsof -i :3000
 # Or inside Docker, check for other containers using the same port
 docker ps --format '{{.Names}} {{.Ports}}'
 ```
+
+**Fix (VPS/PM2):** On a VPS, this is commonly caused by a zombie PM2 process or a previous instance that did not shut down cleanly:
+
+```bash
+# List PM2 processes
+pm2 list
+# Stop the conflicting process
+pm2 stop stt-deploy
+# Or kill all PM2 processes and restart
+pm2 kill
+pm2 start ecosystem.config.js
+```
+
+If the port is held by a systemd service, check with `sudo systemctl list-units --type=service | grep stt` and stop the conflicting service.
 
 ---
 
