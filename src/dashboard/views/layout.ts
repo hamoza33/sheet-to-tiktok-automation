@@ -30,6 +30,7 @@ export function layout(options: LayoutOptions): string {
           ${navItem('/history', 'History', 'history')}
           ${navItem('/activity', 'Activity', 'activity')}
           ${navItem('/workflows', 'Workflows', 'workflows')}
+          ${navItem('/settings', 'Settings', 'settings')}
           <a href="/logout">Logout</a>
         </div>
       </nav>`
