@@ -50,7 +50,7 @@ export function workflowsPage(
                 </div>
                 <div class="form-group">
                   <label for="wf-worksheetName">Worksheet Name</label>
-                  <input type="text" id="wf-worksheetName" required value="Sheet1" placeholder="Tab name">
+                  <input type="text" id="wf-worksheetName" required value="TikTok" placeholder="Tab name">
                 </div>
               </div>
 
@@ -115,7 +115,7 @@ export function workflowsPage(
           document.getElementById('form-title').textContent = 'New Workflow';
           document.getElementById('workflow-form').reset();
           document.getElementById('wf-pollingInterval').value = '60';
-          document.getElementById('wf-worksheetName').value = 'Sheet1';
+          document.getElementById('wf-worksheetName').value = 'TikTok';
           document.getElementById('wf-credentials').value = DEFAULT_CREDENTIALS_PREFILL;
           document.getElementById('wf-credentials').required = true;
           document.getElementById('wf-credentials').placeholder = 'Paste full service account JSON here';
