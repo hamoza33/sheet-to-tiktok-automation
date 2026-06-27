@@ -3,9 +3,14 @@ services:
     build: .
     restart: unless-stopped
     ports:
-      - "${HEALTH_CHECK_PORT:-3000}:${HEALTH_CHECK_PORT:-3000}"
+      - "${HEALTH_CHECK_PORT:-8126}:${HEALTH_CHECK_PORT:-8126}"
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
     volumes:
-      - ./credentials:/app/credentials:ro
+      - ./credentials:/app/credentials
+      - ./workflows.json:/app/workflows.json
+      - ./dashboard-activity.json:/app/dashboard-activity.json
     environment:
       - SHEET_ID
       - WORKSHEET_NAME
@@ -14,3 +19,4 @@ services:
       - BUFFER_CHANNEL_ID
       - POLLING_INTERVAL_SECONDS
       - HEALTH_CHECK_PORT
+      - DASHBOARD_PASSWORD
