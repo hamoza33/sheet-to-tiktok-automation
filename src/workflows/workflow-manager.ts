@@ -337,6 +337,36 @@ export class WorkflowManager {
     return this.toWorkflowState(rw);
   }
 
+  /**
+   * Export all workflows as an array of config objects including credentials JSON content.
+   */
+  exportAllWorkflows(): WorkflowConfig[] {
+    const exported: WorkflowConfig[] = [];
+    for (const rw of this.workflows.values()) {
+      let credentialsJson = '';
+      try {
+        credentialsJson = readFileSync(rw.config.googleCredentialsPath, 'utf-8');
+      } catch {
+        this.logger.warn(`Failed to read credentials for export`, {
+          workflowId: rw.id,
+          credentialsPath: rw.config.googleCredentialsPath,
+        });
+      }
+
+      exported.push({
+        name: rw.config.name,
+        sheetId: rw.config.sheetId,
+        worksheetName: rw.config.worksheetName,
+        googleCredentialsJson: credentialsJson,
+        bufferAccessToken: rw.config.bufferAccessToken,
+        bufferChannelId: rw.config.bufferChannelId,
+        pollingIntervalSeconds: rw.config.pollingIntervalSeconds,
+        enabled: rw.config.enabled,
+      });
+    }
+    return exported;
+  }
+
   // ─── Private Helpers ────────────────────────────────────────────────────────
 
   private registerWorkflow(persisted: PersistedWorkflow): void {

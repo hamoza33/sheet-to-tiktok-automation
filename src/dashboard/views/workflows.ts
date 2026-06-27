@@ -23,7 +23,12 @@ export function workflowsPage(
             <h1 style="font-size: 1.5rem; color: #fff;">Workflows</h1>
             <p style="color: #8888a0; font-size: 0.85rem;">Manage your workflows</p>
           </div>
-          <button onclick="showNewForm()" class="btn btn-primary">➕ New Workflow</button>
+          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <button onclick="exportAllWorkflows()" class="btn btn-secondary">📥 Export All</button>
+            <button onclick="document.getElementById('import-file-input').click()" class="btn btn-secondary">📤 Import All</button>
+            <input type="file" id="import-file-input" accept=".json" style="display: none;" onchange="importAllWorkflows(event)">
+            <button onclick="showNewForm()" class="btn btn-primary">➕ New Workflow</button>
+          </div>
         </div>
 
         <!-- New/Edit Workflow Form (hidden by default) -->
@@ -237,6 +242,62 @@ export function workflowsPage(
           toast.textContent = message;
           document.body.appendChild(toast);
           setTimeout(() => toast.remove(), 4000);
+        }
+
+        async function exportAllWorkflows() {
+          try {
+            const res = await fetch('/api/workflows/export');
+            if (!res.ok) {
+              showToast('error', 'Failed to export workflows');
+              return;
+            }
+            const blob = await res.blob();
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'workflows-export.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast('success', 'Workflows exported!');
+          } catch {
+            showToast('error', 'Network error during export');
+          }
+        }
+
+        async function importAllWorkflows(event) {
+          const file = event.target.files[0];
+          if (!file) return;
+
+          try {
+            const text = await file.text();
+            const workflows = JSON.parse(text);
+
+            if (!Array.isArray(workflows)) {
+              showToast('error', 'Invalid file: expected a JSON array of workflows');
+              event.target.value = '';
+              return;
+            }
+
+            const res = await fetch('/api/workflows/import', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(workflows),
+            });
+
+            const data = await res.json();
+            if (res.ok) {
+              showToast('success', data.message || 'Workflows imported!');
+              setTimeout(() => location.reload(), 1500);
+            } else {
+              showToast('error', data.message || 'Failed to import workflows');
+            }
+          } catch {
+            showToast('error', 'Failed to read or parse the import file');
+          }
+
+          event.target.value = '';
         }
       </script>
     `,

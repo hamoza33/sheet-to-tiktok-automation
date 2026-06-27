@@ -139,6 +139,56 @@ export function createDashboardRouter(workflowManager: WorkflowManager): Router 
     }
   });
 
+  // ─── Workflow Export/Import Endpoints ────────────────────────────────────────────
+
+  router.get('/api/workflows/export', requireAuth, (_req: Request, res: Response) => {
+    const exported = workflowManager.exportAllWorkflows();
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Content-Disposition', 'attachment; filename="workflows-export.json"');
+    res.send(JSON.stringify(exported, null, 2));
+  });
+
+  router.post('/api/workflows/import', requireAuth, async (req: Request, res: Response) => {
+    const body = req.body as unknown;
+
+    if (!Array.isArray(body)) {
+      res.status(400).json({ success: false, message: 'Request body must be a JSON array of workflows' });
+      return;
+    }
+
+    const results: Array<{ name: string; success: boolean; error?: string }> = [];
+
+    for (const item of body) {
+      const name = String(item?.name || 'Unnamed');
+      try {
+        await workflowManager.addWorkflow({
+          name,
+          sheetId: String(item?.sheetId || ''),
+          worksheetName: String(item?.worksheetName || 'Sheet1'),
+          googleCredentialsJson: String(item?.googleCredentialsJson || ''),
+          bufferAccessToken: String(item?.bufferAccessToken || ''),
+          bufferChannelId: String(item?.bufferChannelId || ''),
+          pollingIntervalSeconds: Number(item?.pollingIntervalSeconds) || 60,
+          enabled: item?.enabled !== false,
+        });
+        results.push({ name, success: true });
+      } catch (error) {
+        results.push({
+          name,
+          success: false,
+          error: error instanceof Error ? error.message : 'Failed to import workflow',
+        });
+      }
+    }
+
+    const successCount = results.filter(r => r.success).length;
+    res.json({
+      success: true,
+      message: `Imported ${successCount}/${results.length} workflows`,
+      results,
+    });
+  });
+
   router.get('/api/workflows/:id', requireAuth, (req: Request, res: Response) => {
     const workflow = workflowManager.getWorkflow(paramId(req));
     if (!workflow) {
