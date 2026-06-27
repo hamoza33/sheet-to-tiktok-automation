@@ -21,7 +21,7 @@ export function layout(options: LayoutOptions): string {
     ? `<nav class="top-nav">
         <div class="nav-brand">
           <span class="brand-icon">⚡</span>
-          <span class="brand-text">Sheet → TikTok</span>
+          <span class="brand-text">Zap2</span>
         </div>
         <div class="nav-links">
           ${navItem('/', 'Dashboard', 'dashboard')}
@@ -38,7 +38,7 @@ export function layout(options: LayoutOptions): string {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${title} — Sheet to TikTok</title>
+  <title>${title} — Zap2</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     

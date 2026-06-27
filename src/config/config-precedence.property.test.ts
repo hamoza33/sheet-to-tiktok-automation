@@ -1,4 +1,4 @@
-// Feature: sheet-to-tiktok-automation, Property 6: Environment variable precedence
+// Feature: zap2, Property 6: Environment variable precedence
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import fc from 'fast-check';
 import { writeFileSync, mkdirSync, rmSync } from 'node:fs';
@@ -26,7 +26,7 @@ describe('Property 6: Environment variable precedence', () => {
     { envKey: 'SHEET_ID', fileKey: 'sheetId', configProp: 'googleSheetId' },
     { envKey: 'WORKSHEET_NAME', fileKey: 'worksheetName', configProp: 'worksheetName' },
     { envKey: 'BUFFER_ACCESS_TOKEN', fileKey: 'bufferAccessToken', configProp: 'bufferAccessToken' },
-    { envKey: 'BUFFER_TIKTOK_PROFILE_ID', fileKey: 'bufferTikTokProfileId', configProp: 'bufferTikTokProfileId' },
+    { envKey: 'BUFFER_CHANNEL_ID', fileKey: 'bufferChannelId', configProp: 'bufferChannelId' },
   ] as const;
 
   beforeEach(() => {
@@ -44,6 +44,7 @@ describe('Property 6: Environment variable precedence', () => {
     delete process.env.WORKSHEET_NAME;
     delete process.env.GOOGLE_CREDENTIALS_PATH;
     delete process.env.BUFFER_ACCESS_TOKEN;
+    delete process.env.BUFFER_CHANNEL_ID;
     delete process.env.BUFFER_TIKTOK_PROFILE_ID;
     delete process.env.POLLING_INTERVAL_SECONDS;
     delete process.env.HEALTH_CHECK_PORT;
@@ -72,8 +73,8 @@ describe('Property 6: Environment variable precedence', () => {
           worksheetNameFile: nonEmptyStringArb,
           bufferAccessTokenEnv: nonEmptyStringArb,
           bufferAccessTokenFile: nonEmptyStringArb,
-          bufferTikTokProfileIdEnv: nonEmptyStringArb,
-          bufferTikTokProfileIdFile: nonEmptyStringArb,
+          bufferChannelIdEnv: nonEmptyStringArb,
+          bufferChannelIdFile: nonEmptyStringArb,
         }),
         (values) => {
           // Set env vars with one set of values
@@ -81,7 +82,7 @@ describe('Property 6: Environment variable precedence', () => {
           process.env.WORKSHEET_NAME = values.worksheetNameEnv;
           process.env.GOOGLE_CREDENTIALS_PATH = credentialsPath;
           process.env.BUFFER_ACCESS_TOKEN = values.bufferAccessTokenEnv;
-          process.env.BUFFER_TIKTOK_PROFILE_ID = values.bufferTikTokProfileIdEnv;
+          process.env.BUFFER_CHANNEL_ID = values.bufferChannelIdEnv;
 
           // Write config file with different set of values
           const configFileContent = {
@@ -89,7 +90,7 @@ describe('Property 6: Environment variable precedence', () => {
             worksheetName: values.worksheetNameFile,
             googleCredentialsPath: '/some/other/path.json',
             bufferAccessToken: values.bufferAccessTokenFile,
-            bufferTikTokProfileId: values.bufferTikTokProfileIdFile,
+            bufferChannelId: values.bufferChannelIdFile,
             pollingIntervalSeconds: 60,
             healthCheckPort: 3000,
           };
@@ -102,7 +103,7 @@ describe('Property 6: Environment variable precedence', () => {
           expect(config.googleSheetId).toBe(values.sheetIdEnv);
           expect(config.worksheetName).toBe(values.worksheetNameEnv);
           expect(config.bufferAccessToken).toBe(values.bufferAccessTokenEnv);
-          expect(config.bufferTikTokProfileId).toBe(values.bufferTikTokProfileIdEnv);
+          expect(config.bufferChannelId).toBe(values.bufferChannelIdEnv);
           // Credentials path from env should also win
           expect(config.googleCredentialsPath).toBe(credentialsPath);
         }
@@ -125,7 +126,7 @@ describe('Property 6: Environment variable precedence', () => {
           process.env.WORKSHEET_NAME = 'Sheet1';
           process.env.GOOGLE_CREDENTIALS_PATH = credentialsPath;
           process.env.BUFFER_ACCESS_TOKEN = 'token';
-          process.env.BUFFER_TIKTOK_PROFILE_ID = 'profile';
+          process.env.BUFFER_CHANNEL_ID = 'profile';
           process.env.POLLING_INTERVAL_SECONDS = String(envValue);
 
           // Write config file with different polling interval
@@ -134,7 +135,7 @@ describe('Property 6: Environment variable precedence', () => {
             worksheetName: 'FileSheet',
             googleCredentialsPath: '/other/path.json',
             bufferAccessToken: 'file-token',
-            bufferTikTokProfileId: 'file-profile',
+            bufferChannelId: 'file-profile',
             pollingIntervalSeconds: fileValue,
             healthCheckPort: 3000,
           };
@@ -164,7 +165,7 @@ describe('Property 6: Environment variable precedence', () => {
           process.env.WORKSHEET_NAME = 'Sheet1';
           process.env.GOOGLE_CREDENTIALS_PATH = credentialsPath;
           process.env.BUFFER_ACCESS_TOKEN = 'token';
-          process.env.BUFFER_TIKTOK_PROFILE_ID = 'profile';
+          process.env.BUFFER_CHANNEL_ID = 'profile';
           process.env.HEALTH_CHECK_PORT = String(envPort);
 
           // Write config file with different port
@@ -173,7 +174,7 @@ describe('Property 6: Environment variable precedence', () => {
             worksheetName: 'FileSheet',
             googleCredentialsPath: '/other/path.json',
             bufferAccessToken: 'file-token',
-            bufferTikTokProfileId: 'file-profile',
+            bufferChannelId: 'file-profile',
             pollingIntervalSeconds: 60,
             healthCheckPort: filePort,
           };

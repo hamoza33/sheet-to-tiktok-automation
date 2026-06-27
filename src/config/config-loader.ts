@@ -25,7 +25,7 @@ interface ConfigFile {
   worksheetName?: string;
   googleCredentialsPath?: string;
   bufferAccessToken?: string;
-  bufferTikTokProfileId?: string;
+  bufferChannelId?: string;
   pollingIntervalSeconds?: number | string;
   healthCheckPort?: number | string;
 }
@@ -50,7 +50,8 @@ export class ConfigLoader implements IConfigLoader {
     const worksheetName = this.resolve('WORKSHEET_NAME', fileConfig?.worksheetName);
     const googleCredentialsPath = this.resolve('GOOGLE_CREDENTIALS_PATH', fileConfig?.googleCredentialsPath);
     const bufferAccessToken = this.resolve('BUFFER_ACCESS_TOKEN', fileConfig?.bufferAccessToken);
-    const bufferTikTokProfileId = this.resolve('BUFFER_TIKTOK_PROFILE_ID', fileConfig?.bufferTikTokProfileId);
+    const bufferChannelId = this.resolve('BUFFER_CHANNEL_ID', fileConfig?.bufferChannelId)
+      ?? this.resolve('BUFFER_TIKTOK_PROFILE_ID', undefined);
     const rawPollingInterval = this.resolve('POLLING_INTERVAL_SECONDS', fileConfig?.pollingIntervalSeconds);
     const rawHealthCheckPort = this.resolve('HEALTH_CHECK_PORT', fileConfig?.healthCheckPort);
 
@@ -67,8 +68,8 @@ export class ConfigLoader implements IConfigLoader {
     if (!bufferAccessToken || bufferAccessToken.trim() === '') {
       errors.push('bufferAccessToken (BUFFER_ACCESS_TOKEN) is required and must be a non-empty string');
     }
-    if (!bufferTikTokProfileId || bufferTikTokProfileId.trim() === '') {
-      errors.push('bufferTikTokProfileId (BUFFER_TIKTOK_PROFILE_ID) is required and must be a non-empty string');
+    if (!bufferChannelId || bufferChannelId.trim() === '') {
+      errors.push('bufferChannelId (BUFFER_CHANNEL_ID) is required and must be a non-empty string');
     }
 
     // Validate polling interval (numeric, 10-300, default 60)
@@ -112,7 +113,7 @@ export class ConfigLoader implements IConfigLoader {
       worksheetName: worksheetName!,
       googleCredentialsPath: googleCredentialsPath!,
       bufferAccessToken: bufferAccessToken!,
-      bufferTikTokProfileId: bufferTikTokProfileId!,
+      bufferChannelId: bufferChannelId!,
       pollingIntervalSeconds,
       healthCheckPort,
     };

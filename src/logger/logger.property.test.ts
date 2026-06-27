@@ -1,4 +1,4 @@
-// Feature: sheet-to-tiktok-automation, Property 7: Log format invariant
+// Feature: zap2, Property 7: Log format invariant
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import fc from 'fast-check';
 import { Logger } from './logger.js';

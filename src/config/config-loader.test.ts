@@ -26,6 +26,7 @@ describe('ConfigLoader', () => {
     delete process.env.WORKSHEET_NAME;
     delete process.env.GOOGLE_CREDENTIALS_PATH;
     delete process.env.BUFFER_ACCESS_TOKEN;
+    delete process.env.BUFFER_CHANNEL_ID;
     delete process.env.BUFFER_TIKTOK_PROFILE_ID;
     delete process.env.POLLING_INTERVAL_SECONDS;
     delete process.env.HEALTH_CHECK_PORT;
@@ -51,7 +52,7 @@ describe('ConfigLoader', () => {
     process.env.WORKSHEET_NAME = 'Sheet1';
     process.env.GOOGLE_CREDENTIALS_PATH = credentialsPath;
     process.env.BUFFER_ACCESS_TOKEN = 'buf-token-123';
-    process.env.BUFFER_TIKTOK_PROFILE_ID = 'profile-456';
+    process.env.BUFFER_CHANNEL_ID = 'profile-456';
   }
 
   function validConfigFile() {
@@ -60,7 +61,7 @@ describe('ConfigLoader', () => {
       worksheetName: 'FileSheet',
       googleCredentialsPath: credentialsPath,
       bufferAccessToken: 'file-token',
-      bufferTikTokProfileId: 'file-profile',
+      bufferChannelId: 'file-profile',
       pollingIntervalSeconds: 60,
       healthCheckPort: 3000,
     };
@@ -76,7 +77,7 @@ describe('ConfigLoader', () => {
       expect(config.worksheetName).toBe('Sheet1');
       expect(config.googleCredentialsPath).toBe(credentialsPath);
       expect(config.bufferAccessToken).toBe('buf-token-123');
-      expect(config.bufferTikTokProfileId).toBe('profile-456');
+      expect(config.bufferChannelId).toBe('profile-456');
       expect(config.pollingIntervalSeconds).toBe(60);
       expect(config.healthCheckPort).toBe(3000);
     });
@@ -108,7 +109,7 @@ describe('ConfigLoader', () => {
       expect(config.worksheetName).toBe('FileSheet');
       expect(config.googleCredentialsPath).toBe(credentialsPath);
       expect(config.bufferAccessToken).toBe('file-token');
-      expect(config.bufferTikTokProfileId).toBe('file-profile');
+      expect(config.bufferChannelId).toBe('file-profile');
       expect(config.pollingIntervalSeconds).toBe(60);
       expect(config.healthCheckPort).toBe(3000);
     });
@@ -121,7 +122,7 @@ describe('ConfigLoader', () => {
       process.env.WORKSHEET_NAME = 'EnvSheet';
       process.env.GOOGLE_CREDENTIALS_PATH = credentialsPath;
       process.env.BUFFER_ACCESS_TOKEN = 'env-token';
-      process.env.BUFFER_TIKTOK_PROFILE_ID = 'env-profile';
+      process.env.BUFFER_CHANNEL_ID = 'env-profile';
       process.env.POLLING_INTERVAL_SECONDS = '30';
       process.env.HEALTH_CHECK_PORT = '9090';
 
@@ -131,7 +132,7 @@ describe('ConfigLoader', () => {
       expect(config.googleSheetId).toBe('env-sheet-id');
       expect(config.worksheetName).toBe('EnvSheet');
       expect(config.bufferAccessToken).toBe('env-token');
-      expect(config.bufferTikTokProfileId).toBe('env-profile');
+      expect(config.bufferChannelId).toBe('env-profile');
       expect(config.pollingIntervalSeconds).toBe(30);
       expect(config.healthCheckPort).toBe(9090);
     });
@@ -142,7 +143,7 @@ describe('ConfigLoader', () => {
       process.env.SHEET_ID = 'env-override';
       process.env.GOOGLE_CREDENTIALS_PATH = credentialsPath;
       process.env.BUFFER_ACCESS_TOKEN = 'env-token';
-      process.env.BUFFER_TIKTOK_PROFILE_ID = 'env-profile';
+      process.env.BUFFER_CHANNEL_ID = 'env-profile';
 
       const loader = new ConfigLoader(configFilePath);
       const config = loader.load();
@@ -166,7 +167,7 @@ describe('ConfigLoader', () => {
         expect(err.errors).toContain('worksheetName (WORKSHEET_NAME) is required and must be a non-empty string');
         expect(err.errors).toContain('googleCredentialsPath (GOOGLE_CREDENTIALS_PATH) is required and must be a non-empty string');
         expect(err.errors).toContain('bufferAccessToken (BUFFER_ACCESS_TOKEN) is required and must be a non-empty string');
-        expect(err.errors).toContain('bufferTikTokProfileId (BUFFER_TIKTOK_PROFILE_ID) is required and must be a non-empty string');
+        expect(err.errors).toContain('bufferChannelId (BUFFER_CHANNEL_ID) is required and must be a non-empty string');
       }
     });
 
@@ -255,7 +256,7 @@ describe('ConfigLoader', () => {
       process.env.WORKSHEET_NAME = '   ';
       process.env.GOOGLE_CREDENTIALS_PATH = '';
       process.env.BUFFER_ACCESS_TOKEN = '';
-      process.env.BUFFER_TIKTOK_PROFILE_ID = '';
+      process.env.BUFFER_CHANNEL_ID = '';
       const loader = new ConfigLoader(configFilePath);
       expect(() => loader.load()).toThrow(ConfigError);
     });

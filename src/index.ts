@@ -6,7 +6,7 @@ async function main(): Promise<void> {
   const logger = new Logger();
   const port = parseInt(process.env['HEALTH_CHECK_PORT'] || '3000') || 3000;
 
-  logger.info('Starting Sheet-to-TikTok Multi-Workflow Service');
+  logger.info('Starting Zap2 Multi-Workflow Service');
 
   // Create the workflow manager
   const workflowManager = new WorkflowManager();

@@ -1,4 +1,4 @@
-// Feature: sheet-to-tiktok-automation, Property 2: Caption text validation
+// Feature: zap2, Property 2: Caption text validation
 
 import { describe, it, expect } from 'vitest';
 import * as fc from 'fast-check';

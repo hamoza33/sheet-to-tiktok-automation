@@ -123,7 +123,7 @@ export function createDashboardRouter(workflowManager: WorkflowManager): Router 
       const workflow = await workflowManager.addWorkflow({
         name: String(body.name),
         sheetId: String(body.sheetId),
-        worksheetName: String(body.worksheetName || 'TikTok'),
+        worksheetName: String(body.worksheetName || 'Sheet1'),
         googleCredentialsJson: String(body.googleCredentialsJson || ''),
         bufferAccessToken: String(body.bufferAccessToken || ''),
         bufferChannelId: String(body.bufferChannelId || ''),

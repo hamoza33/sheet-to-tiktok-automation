@@ -21,7 +21,7 @@ export function workflowsPage(
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
           <div>
             <h1 style="font-size: 1.5rem; color: #fff;">Workflows</h1>
-            <p style="color: #8888a0; font-size: 0.85rem;">Manage your Sheet-to-TikTok workflows</p>
+            <p style="color: #8888a0; font-size: 0.85rem;">Manage your workflows</p>
           </div>
           <button onclick="showNewForm()" class="btn btn-primary">➕ New Workflow</button>
         </div>
@@ -35,7 +35,7 @@ export function workflowsPage(
               
               <div class="form-group">
                 <label for="wf-name">Workflow Name</label>
-                <input type="text" id="wf-name" required placeholder="e.g., Varicose Veins TikTok">
+                <input type="text" id="wf-name" required placeholder="e.g., My Workflow">
               </div>
 
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
@@ -45,7 +45,7 @@ export function workflowsPage(
                 </div>
                 <div class="form-group">
                   <label for="wf-worksheetName">Worksheet Name</label>
-                  <input type="text" id="wf-worksheetName" required value="TikTok" placeholder="Tab name">
+                  <input type="text" id="wf-worksheetName" required value="Sheet1" placeholder="Tab name">
                 </div>
               </div>
 
@@ -110,7 +110,7 @@ export function workflowsPage(
           document.getElementById('form-title').textContent = 'New Workflow';
           document.getElementById('workflow-form').reset();
           document.getElementById('wf-pollingInterval').value = '60';
-          document.getElementById('wf-worksheetName').value = 'TikTok';
+          document.getElementById('wf-worksheetName').value = 'Sheet1';
           document.getElementById('wf-credentials').value = DEFAULT_CREDENTIALS_PREFILL;
           document.getElementById('wf-credentials').required = true;
           document.getElementById('wf-credentials').placeholder = 'Paste full service account JSON here';

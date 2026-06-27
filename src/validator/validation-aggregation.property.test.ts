@@ -1,4 +1,4 @@
-// Feature: sheet-to-tiktok-automation, Property 4: Validation errors are fully reported
+// Feature: zap2, Property 4: Validation errors are fully reported
 
 import { describe, it, expect } from 'vitest';
 import * as fc from 'fast-check';

@@ -1,5 +1,5 @@
 /**
- * Core type definitions and interfaces for the Sheet-to-TikTok Automation Service.
+ * Core type definitions and interfaces for the Zap2 Automation Service.
  */
 
 // ─── Data Models ────────────────────────────────────────────────────────────────
@@ -12,7 +12,7 @@ export interface AppConfig {
   worksheetName: string;
   googleCredentialsPath: string;
   bufferAccessToken: string;
-  bufferTikTokProfileId: string;
+  bufferChannelId: string;
   pollingIntervalSeconds: number; // 10-300, default 60
   healthCheckPort: number;        // default 3000
 }
@@ -97,7 +97,7 @@ export interface IRowValidator {
 }
 
 /**
- * Communicates with Buffer's GraphQL API to schedule TikTok posts.
+ * Communicates with Buffer's GraphQL API to schedule social media posts.
  */
 export interface IBufferPublisher {
   schedulePost(captionText: string, videoUrl: string): Promise<PublishResult>;

@@ -1,13 +1,13 @@
-# Sheet-to-TikTok Automation
+# Zap2
 
-A self-hosted automation service that monitors a Google Sheet for new rows and schedules TikTok video posts via Buffer. Runs as a long-lived Node.js process (containerized via Docker) on your VPS — a single-purpose Zapier alternative for the workflow: **Google Sheet → Validation → Buffer → TikTok**.
+A self-hosted automation service that monitors a Google Sheet for new rows and schedules social media video posts via Buffer. Runs as a long-lived Node.js process (containerized via Docker) on your VPS -- a single-purpose Zapier alternative for the workflow: **Google Sheet -> Validation -> Buffer -> Video Post**.
 
 ## Prerequisites
 
 - **Node.js 20+** (for local development)
 - **Docker & Docker Compose** (for deployment)
 - **Google Cloud service account** with Sheets API enabled
-- **Buffer account** with a connected TikTok profile
+- **Buffer account** with a connected channel
 
 ## Google Sheet Setup
 
@@ -17,9 +17,9 @@ Create a Google Sheet with the following column structure:
 |----------|----------|----------|
 | Caption Text | Video URL | Status |
 
-- **Column A (Caption Text)** — The text caption for the TikTok post (max 4000 characters)
-- **Column B (Video URL)** — A publicly accessible URL to the video file
-- **Column C (Status)** — Left empty for new rows. The service writes processing status here: `success`, `error:<reason>`, or `failed:<reason>`
+- **Column A (Caption Text)** -- The text caption for the video post (max 4000 characters)
+- **Column B (Video URL)** -- A publicly accessible URL to the video file
+- **Column C (Status)** -- Left empty for new rows. The service writes processing status here: `success`, `error:<reason>`, or `failed:<reason>`
 
 Leave Column C empty for rows you want processed. The service will fill it in automatically.
 
@@ -28,20 +28,20 @@ Leave Column C empty for rows you want processed. The service will fill it in au
 1. Go to the [Google Cloud Console](https://console.cloud.google.com/)
 2. Create a new project (or select an existing one)
 3. Enable the **Google Sheets API**:
-   - Navigate to APIs & Services → Library
+   - Navigate to APIs & Services -> Library
    - Search for "Google Sheets API" and click Enable
 4. Create a service account:
-   - Navigate to APIs & Services → Credentials
-   - Click "Create Credentials" → "Service Account"
+   - Navigate to APIs & Services -> Credentials
+   - Click "Create Credentials" -> "Service Account"
    - Give it a name and click through the wizard
 5. Create a JSON key for the service account:
    - Click on the service account in the credentials list
    - Go to the "Keys" tab
-   - Click "Add Key" → "Create new key" → JSON
+   - Click "Add Key" -> "Create new key" -> JSON
    - Save the downloaded JSON file to `./credentials/service-account.json`
 6. Share your Google Sheet with the service account:
    - Copy the service account email (looks like `name@project.iam.gserviceaccount.com`)
-   - Open your Google Sheet → Share → paste the email → give Editor access
+   - Open your Google Sheet -> Share -> paste the email -> give Editor access
 
 ## Buffer API Setup
 
@@ -49,10 +49,10 @@ Leave Column C empty for rows you want processed. The service will fill it in au
 2. Get your access token:
    - Go to [Buffer Developer Portal](https://buffer.com/developers/api)
    - Create or retrieve your API access token
-3. Find your TikTok profile ID:
-   - Use the Buffer API to list your profiles: `GET https://api.buffer.com/profiles`
-   - Find the profile entry for your TikTok channel
-   - Copy the `id` field — this is your `BUFFER_TIKTOK_PROFILE_ID`
+3. Find your Buffer channel ID:
+   - Use the Buffer API to list your channels
+   - Find the channel entry for your social media account
+   - Copy the `id` field -- this is your `BUFFER_CHANNEL_ID`
 
 ## Configuration
 
@@ -62,12 +62,12 @@ The service reads configuration from environment variables and/or a `config.json
 
 | Variable | Description | Required | Default |
 |----------|-------------|----------|---------|
-| `SHEET_ID` | Google Sheet ID (from the sheet URL) | Yes | — |
-| `WORKSHEET_NAME` | Name of the worksheet tab to monitor | Yes | — |
-| `GOOGLE_CREDENTIALS_PATH` | Path to service account JSON key file | Yes | — |
-| `BUFFER_ACCESS_TOKEN` | Buffer API access token | Yes | — |
-| `BUFFER_TIKTOK_PROFILE_ID` | Buffer TikTok channel/profile ID | Yes | — |
-| `POLLING_INTERVAL_SECONDS` | How often to check for new rows (10–300) | No | `60` |
+| `SHEET_ID` | Google Sheet ID (from the sheet URL) | Yes | -- |
+| `WORKSHEET_NAME` | Name of the worksheet tab to monitor | Yes | -- |
+| `GOOGLE_CREDENTIALS_PATH` | Path to service account JSON key file | Yes | -- |
+| `BUFFER_ACCESS_TOKEN` | Buffer API access token | Yes | -- |
+| `BUFFER_CHANNEL_ID` | Buffer channel/profile ID | Yes | -- |
+| `POLLING_INTERVAL_SECONDS` | How often to check for new rows (10-300) | No | `60` |
 | `HEALTH_CHECK_PORT` | Port for the health check HTTP endpoint | No | `3000` |
 
 ### Config File
@@ -80,7 +80,7 @@ Alternatively, create a `config.json` in the project root (see `config.example.j
   "worksheetName": "Sheet1",
   "googleCredentialsPath": "./credentials/service-account.json",
   "bufferAccessToken": "your-buffer-access-token",
-  "bufferTikTokProfileId": "your-buffer-tiktok-profile-id",
+  "bufferChannelId": "your-buffer-channel-id",
   "pollingIntervalSeconds": 60,
   "healthCheckPort": 3000
 }
@@ -183,7 +183,7 @@ Response format:
 | Status | Meaning |
 |--------|---------|
 | `healthy` | Last poll succeeded, no consecutive errors |
-| `degraded` | 1–4 consecutive errors within 60 seconds |
+| `degraded` | 1-4 consecutive errors within 60 seconds |
 | `unhealthy` | 5+ consecutive errors within 60 seconds (polling has ceased) |
 
 When the status is `unhealthy`, the service has stopped polling and requires a manual restart or external orchestrator intervention.

@@ -15,7 +15,7 @@ export function loginPage(error?: string): string {
         <div class="card" style="width: 100%; max-width: 400px;">
           <div style="text-align: center; margin-bottom: 1.5rem;">
             <span style="font-size: 2.5rem;">⚡</span>
-            <h1 style="font-size: 1.3rem; margin-top: 0.5rem; color: #fff;">Sheet → TikTok Automation</h1>
+            <h1 style="font-size: 1.3rem; margin-top: 0.5rem; color: #fff;">Zap2</h1>
             <p style="color: #8888a0; font-size: 0.85rem; margin-top: 0.25rem;">Sign in to your dashboard</p>
           </div>
           <form method="POST" action="/login">

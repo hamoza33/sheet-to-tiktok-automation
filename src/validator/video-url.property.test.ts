@@ -1,4 +1,4 @@
-// Feature: sheet-to-tiktok-automation, Property 3: Video URL validation
+// Feature: zap2, Property 3: Video URL validation
 import { describe, it, expect } from 'vitest';
 import * as fc from 'fast-check';
 import { RowValidator } from './row-validator.js';

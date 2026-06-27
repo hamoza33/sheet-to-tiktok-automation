@@ -18,7 +18,7 @@ function createMockConfig(): AppConfig {
     worksheetName: 'Sheet1',
     googleCredentialsPath: '/path/to/creds.json',
     bufferAccessToken: 'test-token',
-    bufferTikTokProfileId: 'test-profile-id',
+    bufferChannelId: 'test-profile-id',
     pollingIntervalSeconds: 10,
     healthCheckPort: 3000,
   };
@@ -151,7 +151,7 @@ describe('AutomationService', () => {
   describe('pollCycle()', () => {
     it('should fetch unprocessed rows and process valid rows successfully', async () => {
       const rows: SheetRow[] = [
-        { rowNumber: 2, captionText: 'Hello TikTok', videoUrl: 'https://example.com/video.mp4', processedMarker: null },
+        { rowNumber: 2, captionText: 'Hello World', videoUrl: 'https://example.com/video.mp4', processedMarker: null },
       ];
 
       const deps = createDeps();
@@ -166,7 +166,7 @@ describe('AutomationService', () => {
       expect(deps.sheetPoller.fetchUnprocessedRows).toHaveBeenCalled();
       expect(deps.rowValidator.validate).toHaveBeenCalledWith(rows[0]);
       expect(deps.sheetPoller.markRowProcessing).toHaveBeenCalledWith(2);
-      expect(deps.bufferPublisher.schedulePost).toHaveBeenCalledWith('Hello TikTok', 'https://example.com/video.mp4');
+      expect(deps.bufferPublisher.schedulePost).toHaveBeenCalledWith('Hello World', 'https://example.com/video.mp4');
       expect(deps.sheetPoller.markRowProcessed).toHaveBeenCalledWith(2, 'success');
       expect(deps.healthCheckServer.updateLastPoll).toHaveBeenCalled();
 

@@ -37,7 +37,7 @@ function createMockConfig(): AppConfig {
     worksheetName: 'Sheet1',
     googleCredentialsPath: '/path/to/credentials.json',
     bufferAccessToken: 'test-token',
-    bufferTikTokProfileId: 'test-profile',
+    bufferChannelId: 'test-profile',
     pollingIntervalSeconds: 60,
     healthCheckPort: 3000,
   };

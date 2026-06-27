@@ -38,7 +38,7 @@ interface CreatePostSuccessResponse {
 }
 
 /**
- * Buffer GraphQL API client for scheduling TikTok posts.
+ * Buffer GraphQL API client for scheduling social media posts.
  * Sends createPost mutations with Bearer token authentication,
  * 30-second timeout, and up to 3 retries with 5-second delay.
  */

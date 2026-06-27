@@ -1,4 +1,4 @@
-// Feature: sheet-to-tiktok-automation, Property 5: Configuration validation detects invalid values
+// Feature: zap2, Property 5: Configuration validation detects invalid values
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { writeFileSync, mkdirSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
@@ -27,7 +27,7 @@ describe('Property 5: Configuration validation detects invalid values', () => {
     'WORKSHEET_NAME',
     'GOOGLE_CREDENTIALS_PATH',
     'BUFFER_ACCESS_TOKEN',
-    'BUFFER_TIKTOK_PROFILE_ID',
+    'BUFFER_CHANNEL_ID',
   ] as const;
 
   // Map env var names to the config key names used in error messages
@@ -36,7 +36,7 @@ describe('Property 5: Configuration validation detects invalid values', () => {
     WORKSHEET_NAME: 'worksheetName',
     GOOGLE_CREDENTIALS_PATH: 'googleCredentialsPath',
     BUFFER_ACCESS_TOKEN: 'bufferAccessToken',
-    BUFFER_TIKTOK_PROFILE_ID: 'bufferTikTokProfileId',
+    BUFFER_CHANNEL_ID: 'bufferChannelId',
   };
 
   beforeEach(() => {
@@ -54,6 +54,7 @@ describe('Property 5: Configuration validation detects invalid values', () => {
     delete process.env.WORKSHEET_NAME;
     delete process.env.GOOGLE_CREDENTIALS_PATH;
     delete process.env.BUFFER_ACCESS_TOKEN;
+    delete process.env.BUFFER_CHANNEL_ID;
     delete process.env.BUFFER_TIKTOK_PROFILE_ID;
     delete process.env.POLLING_INTERVAL_SECONDS;
     delete process.env.HEALTH_CHECK_PORT;
@@ -73,7 +74,7 @@ describe('Property 5: Configuration validation detects invalid values', () => {
     process.env.WORKSHEET_NAME = 'Sheet1';
     process.env.GOOGLE_CREDENTIALS_PATH = credentialsPath;
     process.env.BUFFER_ACCESS_TOKEN = 'valid-token';
-    process.env.BUFFER_TIKTOK_PROFILE_ID = 'valid-profile';
+    process.env.BUFFER_CHANNEL_ID = 'valid-profile';
   }
 
   // Generator: random non-empty subset of required keys to omit

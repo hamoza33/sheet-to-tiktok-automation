@@ -25,7 +25,7 @@ export function activityPage(data: ActivityPageData): string {
         <a href="${escapeHtml(a.videoUrl)}" target="_blank" rel="noopener" style="color: #e94560; text-decoration: none;">${escapeHtml(a.videoUrl.substring(0, 40))}${a.videoUrl.length > 40 ? '...' : ''}</a>
       </td>
       <td><span class="badge badge-${a.status}">${a.status}</span></td>
-      <td style="max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${a.tiktokVideoLink ? `<a href="${escapeHtml(a.tiktokVideoLink)}" target="_blank" rel="noopener" style="color: #e94560; text-decoration: none;">View</a>` : '-'}</td>
+      <td style="max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${a.videoLink ? `<a href="${escapeHtml(a.videoLink)}" target="_blank" rel="noopener" style="color: #e94560; text-decoration: none;">View</a>` : '-'}</td>
       <td style="font-size: 0.85rem; color: #e0e0e0;">${a.bufferUsername ? escapeHtml(a.bufferUsername) : '-'}</td>
       <td style="font-size: 0.8rem; color: #8888a0; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeHtml(a.details)}">${escapeHtml(a.details.substring(0, 50))}</td>
     </tr>
@@ -80,7 +80,7 @@ export function activityPage(data: ActivityPageData): string {
                   <th>Caption</th>
                   <th>Video URL</th>
                   <th>Status</th>
-                  <th>TikTok Link</th>
+                  <th>Video Link</th>
                   <th>Buffer Account</th>
                   <th>Details</th>
                 </tr>

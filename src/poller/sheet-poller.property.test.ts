@@ -1,4 +1,4 @@
-// Feature: sheet-to-tiktok-automation, Property 1: Unprocessed row filtering and ordering
+// Feature: zap2, Property 1: Unprocessed row filtering and ordering
 
 import { describe, it, expect } from 'vitest';
 import * as fc from 'fast-check';

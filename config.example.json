@@ -3,7 +3,7 @@
   "worksheetName": "Sheet1",
   "googleCredentialsPath": "./credentials/service-account.json",
   "bufferAccessToken": "your-buffer-access-token",
-  "bufferTikTokProfileId": "your-buffer-tiktok-profile-id",
+  "bufferChannelId": "your-buffer-channel-id",
   "pollingIntervalSeconds": 60,
   "healthCheckPort": 3000
 }

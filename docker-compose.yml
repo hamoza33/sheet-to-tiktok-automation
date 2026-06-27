@@ -11,6 +11,6 @@ services:
       - WORKSHEET_NAME
       - GOOGLE_CREDENTIALS_PATH=/app/credentials/service-account.json
       - BUFFER_ACCESS_TOKEN
-      - BUFFER_TIKTOK_PROFILE_ID
+      - BUFFER_CHANNEL_ID
       - POLLING_INTERVAL_SECONDS
       - HEALTH_CHECK_PORT

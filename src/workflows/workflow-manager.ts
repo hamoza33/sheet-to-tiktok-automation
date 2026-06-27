@@ -447,7 +447,7 @@ export class WorkflowManager {
             details: `Post scheduled (ID: ${publishResult.postId || 'N/A'})`,
             workflowId: rw.id,
             workflowName: rw.config.name,
-            tiktokVideoLink: row.videoUrl,
+            videoLink: row.videoUrl,
             bufferUsername: rw.config.bufferChannelId,
           });
 
@@ -513,7 +513,7 @@ export class WorkflowManager {
       worksheetName: persisted.worksheetName,
       googleCredentialsPath: persisted.googleCredentialsPath,
       bufferAccessToken: persisted.bufferAccessToken,
-      bufferTikTokProfileId: persisted.bufferChannelId,
+      bufferChannelId: persisted.bufferChannelId,
       pollingIntervalSeconds: persisted.pollingIntervalSeconds,
       healthCheckPort: 3000,
     };
@@ -580,9 +580,9 @@ export class WorkflowManager {
 
   private buildLegacyConfig(): WorkflowConfig | null {
     const sheetId = process.env['SHEET_ID'] || process.env['GOOGLE_SHEET_ID'] || '';
-    const worksheetName = process.env['WORKSHEET_NAME'] || 'TikTok';
+    const worksheetName = process.env['WORKSHEET_NAME'] || 'Sheet1';
     const bufferAccessToken = process.env['BUFFER_ACCESS_TOKEN'] || '';
-    const bufferChannelId = process.env['BUFFER_TIKTOK_PROFILE_ID'] || '';
+    const bufferChannelId = process.env['BUFFER_CHANNEL_ID'] || process.env['BUFFER_TIKTOK_PROFILE_ID'] || '';
     const pollingInterval = parseInt(process.env['POLLING_INTERVAL_SECONDS'] || '60') || 60;
     const credPath = process.env['GOOGLE_CREDENTIALS_PATH'] || '';
 
