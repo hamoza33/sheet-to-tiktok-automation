@@ -1,6 +1,6 @@
 import { layout } from './layout.js';
 import type { WorkflowState } from '../../workflows/workflow-manager.js';
-import { DEFAULT_GOOGLE_CREDENTIALS_JSON } from '../../workflows/workflow-manager.js';
+import { getDefaultGoogleCredentialsJson } from '../../workflows/workflow-manager.js';
 
 export function workflowsPage(
   workflows: WorkflowState[],
@@ -96,7 +96,7 @@ export function workflowsPage(
       </div>
 
       <script>
-        const DEFAULT_CREDENTIALS_PREFILL = ${JSON.stringify(DEFAULT_GOOGLE_CREDENTIALS_JSON)};
+        const DEFAULT_CREDENTIALS_PREFILL = ${JSON.stringify(getDefaultGoogleCredentialsJson())};
 
         function toggleTokenVisibility() {
           const input = document.getElementById('wf-bufferAccessToken');

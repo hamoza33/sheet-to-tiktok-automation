@@ -4,3 +4,5 @@ dist/
 config.json
 credentials/
 *.map
+.agents/
+dashboard-activity.json

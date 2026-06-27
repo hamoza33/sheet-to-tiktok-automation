@@ -69,19 +69,19 @@ interface RunningWorkflow {
 const WORKFLOWS_FILE = resolve(process.cwd(), 'workflows.json');
 const CREDENTIALS_DIR = resolve(process.cwd(), 'credentials');
 
-export const DEFAULT_GOOGLE_CREDENTIALS_JSON = JSON.stringify({
-  "type": "service_account",
-  "project_id": "red-octane-489001-d8",
-  "private_key_id": "69e882af0ae20a55b97d8e5f7f9981f1b6a2cb32",
-  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQC/1TmesDwv5t3h\nXGSCB5ktwMxCZQtwvKh5dZ13GTPQ1HS9J/9I4m2OoEIybvhBtFFhL7Nuux5ZqBEe\n6s1jbHdsJuoUGFYrLpi6KVWqstnh9zMRVNex6EhcNnr9XAI5K5bSqRXWBoPJ6TU8\nIo2gCgImuhFk+ewyBaCJGZIrlrw8aN0YlPnCUw2ignk4L6gEdWMysYAifo05FSji\nD2r+6wEmwUXvvN/0EUwcI4wf9RkdVykVXPVqYriM7vNGqSgZaTRewopROJ1lkWxM\nOeaEOLZR69/5Qq7a6AdeFg3ZDY8OWIj/mTMYtxcjZalHY9WrI82nI8JCRG+cfkpe\nIvm0kmT/AgMBAAECggEAINEt28djbIBuycxgB1ycaFbYuq0FkYI8whaMWyENG7cU\nx31Nr17JBkLFQFJ6lubtmxYpeJJ7RTQ6xZK+kzktjutzVP+60gVVLFfA54RUQNNk\nwZzFj5JguqG5VZmFadlaomw5p5USu5pxOHnix5OevZhMPH2C2iXbSkj9GAbf6eds\nvmTWUCmyGmYukB/WEYDKFUyeHMIt6ZPai7eMw67ArtMa3JDNwdJ3jj/cH4+aSpr5\nNy4Rir3T6JXkz6WB7iJxzSPDNrikonuihmGKXe6M4KS6UTg19JFT6jT+3Xqn+von\nvIRaeZOeVBYTzaYdEOKYXaT/d8WncAXVq594o3kgfQKBgQDjeToRIijTUEKjW8xI\nb3Jk5jhsbwvP3ASC6TFhC5ZIDYL/GuXOhPTvSKF7sAea+UhZTiTX+LC+8Z/MzV3b\nLMKv4LENViLLkHWVnxuQvjQaJnYnRngjc4FTWocMv2lGD1yAVJCfR2lFVabWzfe1\nPEZSVZPSFbOnof9hsrTl8nM/swKBgQDX48waHiB4xO+/P6Avv8hPDE5BHrnFfIkD\natzFo2DcupRg2LTmygp2ueERFBAFSevnKvYzUrlqVq/gThALmA3xuhi9wqevQmVl\nrAJzDvB2sftvvvX+Omx7Aj9qcapHqD9jbZjuptHbiZ+K4rAHedJYNNFXvdeYV+b1\nJjQbnUX/hQKBgC6uLP1hHjGnMdWmO/jNbhNIr2GJNEpWo1JeGnUI1LE6nJxPX8OO\nw1jrdcAVMqpZ57/z6lmrvlGg8iMsLcuRlu5S1OKgv4k4vviSayy766NGK08KBhN4\nW5zIYhh6m1b2RgxLzlXxaKgC2LcSE3hMwz2YNDqTm4eWFfttmfPqWj5DAoGBALOR\nfx+uNVYegEez9VoiC8tsMd7KXrybxB76kJ03MocGDgqr1XQtUxzDqSeaZ2Tuwm/p\n9RRlV2HSrsFETOZH2Dlaj9+ue+kzscEqnHL1Vx9zFO8yh8uo7rg1+2dfGcI2eFsM\nOusuCFmxk+liegYN1t6VOBbiCeRmIO2BlE/vtdw9AoGBAN/LNegQR6KA3YOxqWeD\nj2YG6+jRS7tPAhhecNVMWQ8B62zaf7+YvMKeyo8vp76V3fpROQgoYqP3C3Tl1a3x\n3QM6aiP/ZceVbNgR+X4Vij3xGjvnczlKF9x3PteYd3p+D0DeV7ICYFOKj2b0Lqzh\n7HMpP6FTbHGFK5sbRgujLAXM\n-----END PRIVATE KEY-----\n",
-  "client_email": "zap-228@red-octane-489001-d8.iam.gserviceaccount.com",
-  "client_id": "108358723279159796154",
-  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-  "token_uri": "https://oauth2.googleapis.com/token",
-  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/zap-228%40red-octane-489001-d8.iam.gserviceaccount.com",
-  "universe_domain": "googleapis.com"
-}, null, 2);
+/**
+ * Load default Google credentials from the credentials directory.
+ * Never hardcode credentials in source code — they are loaded from disk at runtime.
+ */
+export function getDefaultGoogleCredentialsJson(): string {
+  const defaultPath = resolve(CREDENTIALS_DIR, 'default-service-account.json');
+  try {
+    if (existsSync(defaultPath)) {
+      return readFileSync(defaultPath, 'utf-8');
+    }
+  } catch { /* non-fatal */ }
+  return '';
+}
 
 // ─── WorkflowManager ────────────────────────────────────────────────────────────
 
